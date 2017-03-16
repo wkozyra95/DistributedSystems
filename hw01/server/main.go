@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"sync"
+	"time"
 )
 
 type UserMessage struct {
@@ -58,6 +59,7 @@ func main() {
 	listenUDPChannel := make(chan int)
 	go listenForUDPData(listenUDPChannel, connectionPool)
 	for {
+		time.Sleep(1 * time.Second)
 		select {
 		case <-listenTCPChannel:
 			return
