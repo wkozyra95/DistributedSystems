@@ -1,2 +1,9 @@
 
 *.swp
+*.swo
+.idea
+out
+build
+_build
+target
+.gradle
