@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+message BasicRequest {
+  int64 id = 1;
+}
+
+message BasicResponse {
+  string status = 1;
+}
+
+message Person {
+  int64 id = 1;
+  string first_name = 2;
+  string last_name = 3;
+}
+
+message Patient {
+  Person identity = 1;
+}
+message Patients {
+  repeated Patient patients = 1;
+}
+
+message Doctor {
+  Person identity = 1;
+}
+
+message Doctors {
+  repeated Doctor doctors = 1;
+}
+
+message Technican {
+  Person identity = 1;
+}
+
+message Technicans {
+  repeated Technican technicans = 1;
+}
+
+message MedicalTest {
+  int64 id = 1;
+  Patient patient = 2;
+  Doctor doctor = 3;
+  Technican technican = 4;
+  map<string, double> results = 5;
+}
+
+message MedicalTests {
+  repeated MedicalTest tests = 1;
+}
+
+message FilterByIdRequest {
+  int64 id = 1;
+  int64 filterId = 2;
+}
+
+message AddTestRequest {
+  int64 doctor = 1;
+  int64 patient = 2;
+  int64 technican = 3;
+  map<string, double> results = 4;
+}
+
+service PatientService {
+  rpc RequestAllResults (BasicRequest) returns (stream MedicalTests) {};
+  rpc RequestPersonalData (BasicRequest) returns (Patient) {};
+}
+
+service DoctorService {
+  rpc RequestAllPatients (BasicRequest) returns (Patients) {};
+  rpc RequestPatientsForDoctor (BasicRequest) returns (Patients) {};
+  rpc RequestResultsWithId (FilterByIdRequest) returns (MedicalTest) {};
+}
+
+service TechnicanService {
+  rpc AddResults (AddTestRequest) returns (BasicResponse) {};
+  rpc RequestAllResultsForTechnican (BasicRequest) returns (MedicalTests) {};
+}
+
+service PublicService {
+  rpc ListDoctors (BasicRequest) returns (Doctors) {};
+  rpc ListTechnicans (BasicRequest) returns (Technicans) {};
+}
+
+
