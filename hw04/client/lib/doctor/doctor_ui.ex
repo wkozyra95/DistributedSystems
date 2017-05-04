@@ -16,10 +16,28 @@ defmodule Hospital.DoctorUI do
 
   defp send_request(cmd, id) do
     case cmd do
+      ["list", "patients", "all"] -> spawn fn -> list_all_patients() end
+      ["list", "patients", "doctor"] -> spawn fn -> list_doctor_patients() end
       ["list", "doctor"] -> spawn fn -> list_doctors() end
       ["list", "technican"] -> spawn fn -> list_technicans() end
       _ -> IO.puts "Invalid cmd"
     end
+  end
+
+  def list_all_patients() do
+    {channel, id} = Agent.get(__MODULE__, fn(x) -> {x.channel, x.id} end)
+    {numeric_id, ""} = Integer.parse(id)
+    request = Hospital.BasicRequest.new(id: numeric_id)
+    results = channel |> Hospital.DoctorService.Stub.request_all_patients(request)
+    IO.inspect results 
+  end
+
+  def list_doctor_patients() do
+    {channel, id} = Agent.get(__MODULE__, fn(x) -> {x.channel, x.id} end)
+    {numeric_id, ""} = Integer.parse(id)
+    request = Hospital.BasicRequest.new(id: numeric_id)
+    results = channel |> Hospital.DoctorService.Stub.request_patients_for_doctor(request)
+    IO.inspect results 
   end
 
   def list_doctors() do

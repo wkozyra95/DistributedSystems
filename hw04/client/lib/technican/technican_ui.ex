@@ -28,19 +28,18 @@ defmodule Hospital.TechnicanUI do
     {numeric_id, ""} = Integer.parse(id)
     {patient_id, ""} = Integer.parse(patient)
     {doctor_id, ""} = Integer.parse(doctor)
-    key = nil
-    results = %{}
-    Enum.each(key_values, fn(x) ->
-      if key == nil do
-        key = x
+    {results, key} = Enum.reduce(key_values, {[], nil}, fn(x, acc) ->
+      IO.inspect acc
+      if elem(acc, 1) == nil do
+        {elem(acc, 0), x}
       else
-        {int, ""} = Integer.parse(x)
-        results = Map.merge(results, %{key => int})
-        key = nil
+        {float, ""} = Float.parse(x)
+        {elem(acc, 0) ++ [{elem(acc, 1), float}], nil}
       end
     end)
     
-    request = Hospital.AddTestRequest.new([doctor: doctor_id, patient: patient_id, technican: numeric_id, results: []])
+    IO.inspect results
+    request = Hospital.AddTestRequest.new([doctor: doctor_id, patient: patient_id, technican: numeric_id, results: results])
     results = channel |> Hospital.TechnicanService.Stub.add_results(request)
     IO.inspect results 
   end
