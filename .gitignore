@@ -1,7 +1,15 @@
 
 *.swp
 *.swo
+
 .idea
+*.iml
+*.ipr
+*.iws
+
+target
+*.class
+
 out
 build
 _build
