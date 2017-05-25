@@ -16,6 +16,7 @@ object Server {
     val dbManager = system.actorOf(Props(new DataStoreManager()), "db")
     val findActor = system.actorOf(Props(new FindActor(dbManager)), "find")
     val orderActor = system.actorOf(Props(new OrderActor(dbManager)), "order")
+    val contentActor = system.actorOf(Props(new ContentActor(dbManager)), "content")
   }
 }
 
@@ -32,6 +33,15 @@ class OrderActor(val dbManager: ActorRef) extends Actor {
     case query: OrderQuery =>
       dbManager ! Array(query, context.sender())
     case _ => Console.print("Unknown query in OrderActor\n")
+  }
+}
+
+
+class ContentActor(val dbManager: ActorRef) extends Actor {
+  def receive: PartialFunction[Any, Unit] = {
+    case query: StreamContentQuery =>
+      dbManager ! Array(query, context.sender())
+    case _ => Console.print("Unknown query in ContentActor\n")
   }
 }
 

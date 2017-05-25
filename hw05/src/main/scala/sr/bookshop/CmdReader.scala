@@ -25,6 +25,9 @@ object CmdReader {
       case Array("order", name) =>
         actorRef.get ! OrderQuery(name)
         true
+      case Array("content", name) =>
+        actorRef.get ! StreamContentQuery(name)
+        true
       case Array("q" | "quit") =>
         false
       case _ =>

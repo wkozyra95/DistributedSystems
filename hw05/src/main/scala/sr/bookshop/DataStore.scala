@@ -1,16 +1,21 @@
 package sr.bookshop
 
-import java.io.{File, FileOutputStream, PrintWriter}
+import java.io.{File, FileInputStream, FileOutputStream, PrintWriter}
 
+import akka.NotUsed
 import akka.actor.{Actor, ActorRef, Props}
 import akka.actor.Actor.Receive
 import akka.util.Timeout
 import akka.pattern.ask
+import akka.stream.{ActorMaterializer, OverflowStrategy, ThrottleMode}
+import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.Source
 
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration._
-import scala.io.{BufferedSource, Source}
+import akka.stream.scaladsl._
+import scala.io.{Source => IOSource}
+
 import scala.language.postfixOps
 
 
@@ -39,6 +44,15 @@ class DataStoreManager extends Actor {
         } else {
           orders ! Array(query, ref)
         }
+      case Array(query: StreamContentQuery, ref: ActorRef) =>
+        implicit val materializer = ActorMaterializer.create(context)
+
+        val run = Source.actorRef(1000, OverflowStrategy.dropNew)
+          .throttle(1, FiniteDuration.apply(1, "s"), 10, ThrottleMode.shaping)
+          .to(Sink.actorRef(ref, NotUsed))
+          .run()
+        val lines = IOSource.fromFile("content_sample.txt").getLines()
+        lines.foreach((line: String) => run.tell(line, ref))
       case _ => Console.print("No match DataStoreManager\n")
     }
     pattern
@@ -55,7 +69,7 @@ class DataStoreActor(val path: String) extends Actor {
 
 class DataStore(val path: String) {
   def find(name: String): Array[String] = {
-    Source.fromFile(path).getLines().filter((line: String) => {
+    IOSource.fromFile(path).getLines().filter((line: String) => {
       val Array(title, price) = line.split(' ')
       name match {
         case `title` => true
@@ -84,5 +98,4 @@ class OrderWriter(val path: String) {
     orders.flush()
   }
 }
-
 
