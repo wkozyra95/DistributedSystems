@@ -1,2 +1,4 @@
 test1 12
-test2 12
+test2 1
+test3 9
+test4 10

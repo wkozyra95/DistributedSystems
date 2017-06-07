@@ -29,7 +29,7 @@ class ClientActor extends Actor {
     case FindResponse(list: Array[String]) =>
       Console.print("find result: " + list.deep.mkString(", "))
     case OrderResponse(r: Boolean) => Console.print(r)
-    case text: String => Console.print(text)
+    case text: String => Console.println(text)
     case _ => print("Unknown message\n")
   }
 }
